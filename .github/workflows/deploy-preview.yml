@@ -1,1 +1,45 @@
 
+name: Aggiorna anteprima REM Next
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copia il branch Sviluppo-Enrica
+        run: |
+          git clone --depth 1 --branch Sviluppo-Enrica https://github.com/9ty4w4zkwy-commits/REM-next.git source
+          mkdir public
+          cp -a source/. public/
+          rm -rf public/.git public/.github
+          touch public/.nojekyll
+
+      - name: Configura GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Prepara il sito
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Pubblica anteprima
+        id: deployment
+        uses: actions/deploy-pages@v4
+
